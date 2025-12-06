@@ -1,28 +1,29 @@
 import { Router } from 'express';
-import {getLectura} from "../controllers/lectura.js"
+import {getLectura, getLecturaId, postLecturaPrincipal, postLecturaDiaria} from "../controllers/lectura.js"
 import { validarCampos } from "../middlewares/validar-campos.js";
 import { check } from "express-validator";  
+import { get } from 'mongoose';
 
 const router = Router();
 
-// router.post('/principal/:usuario_id', 
-//     // [a,
-//     // validarCampos],
-// );
+router.post('/principal/:email', 
+    // [a,
+    // validarCampos],
+postLecturaPrincipal);
 
-// router.post('/diaria/:usuario_id', 
-//     // [a,
-//     // validarCampos],
-//  );
+router.post('/diaria/:email', 
+    // [a,
+    // validarCampos],
+ postLecturaDiaria);
 
-router.get('/usuario/:usuario_id', 
+router.get('/usuario/:email', 
     // [a,
     // validarCampos],
 getLectura);
 
-// router.get('/:id',
-//     // [a,
-//     // validarCampos],
-//  );
+router.get('/:id',
+    // [a,
+    // validarCampos],
+ getLecturaId);
 
 export default router;
