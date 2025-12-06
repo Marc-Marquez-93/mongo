@@ -30,6 +30,14 @@ const postLecturaPrincipal = async (req, res) => {
         const { id, contenido } = req.body;
         const tipo = 0;
 
+         const existePrincipal = await Lectura.findOne({ usuario_email: email, tipo: 0 });
+
+        if (existePrincipal) {
+            return res.status(400).json({
+                msg: "Ya existe una lectura principal para este usuario"
+            });
+        }
+
         const nuevaLectura = new Lectura({ id, usuario_email: email, tipo, contenido })
         await nuevaLectura.save()
         res.json({ nuevaLectura, msg: "Lectura principal creada correctamente" })
