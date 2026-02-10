@@ -116,64 +116,74 @@ const postLecturaDiaria = async (req, res = response) => {
         const { email } = req.params;
         const tipo = 1; 
 
-        // 1. Verificar Pago
         const pago = await Pago.findOne({ usuario_email: email }).sort({ fecha_pago: -1 });
         
-        // Si estás probando sin pagos, comenta estas líneas:
         if (!pago) {
-            return res.status(403).json({ estado: "sin pagos", msg: "Debe realizar un pago para lecturas diarias" });
-        }
-        const ahora = new Date();
-        if (ahora > pago.fecha_vencimiento) {
-            return res.status(403).json({ estado: "vencido", msg: "Suscripción vencida" });
+            return res.status(403).json({ estado: "sin pagos", msg: "Debe realizar un pago para acceder a lecturas diarias" });
         }
 
-        // 2. Verificar duplicado diario
+        const ahora = new Date();
+
+        if (ahora > pago.vencimiento) {
+            return res.status(403).json({ estado: "vencido", msg: "Tu suscripción ha vencido, por favor renueva tu pago" });
+        }
+
         const inicioDia = new Date();
         inicioDia.setHours(0, 0, 0, 0);
         const finDia = new Date();
         finDia.setHours(23, 59, 59, 999);
 
-        // Ajusta 'fecha' según tu modelo real
         const lecturaHoy = await Lectura.findOne({
             usuario_email: email,
             tipo: 1,
-            fecha: { $gte: inicioDia, $lte: finDia } 
+            fecha_lectura: { $gte: inicioDia, $lte: finDia } 
         });
 
         if (lecturaHoy) {
-            return res.status(400).json({ msg: "Ya generaste tu lectura diaria de hoy" });
+            return res.status(400).json({ 
+                msg: "Ya tienes tu mensaje místico del día. Vuelve mañana por una nueva guía.",
+                lectura: lecturaHoy 
+            });
         }
 
-        // 3. Obtener Usuario
         const usuario = await Usuario.findOne({ email });
-        const fechaNac = new Date(usuario.fecha_nacimiento).toLocaleDateString("es-ES", {
+        if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado" });
+
+        const fechaObj = new Date(usuario.fecha_nacimiento);
+        if (isNaN(fechaObj.getTime())) {
+            return res.status(400).json({ msg: "La fecha de nacimiento del usuario no es válida para numerología" });
+        }
+
+        const fechaNacString = fechaObj.toLocaleDateString("es-ES", {
             year: "numeric", month: "long", day: "numeric"
         });
 
-        // 4. Generar con Gemini
-        const prompt = `Eres un experto en numerología pitagórica diaria. Analiza la energía del día actual según la fecha de nacimiento ${fechaNac}. Menciona el número del día y cómo influye hoy. Tono: inspirador, breve.`;
+        const prompt = `Eres un guía espiritual y experto en numerología. Analiza la energía del día de hoy (${ahora.toLocaleDateString()}) para una persona nacida el ${fechaNacString}. Dame un consejo místico breve y poderoso de máximo 3 frases.`;
+        
         const contenidoIA = await llamarGemini(prompt);
 
         if (!contenidoIA) {
-            return res.status(500).json({ msg: "Error al conectar con la IA" });
+            return res.status(500).json({ msg: "La conexión espiritual (IA) falló. Intenta en un momento." });
         }
 
-        // 5. Guardar
         const nuevaLectura = new Lectura({
             usuario_email: email,
             tipo,
-            contenido: contenidoIA,
-            fecha: ahora
+            contenido: contenidoIA
         });
 
         await nuevaLectura.save();
-        res.json({ nuevaLectura, msg: "Lectura diaria generada con éxito" });
+        
+        res.json({ 
+            nuevaLectura, 
+            msg: "Energía diaria recibida con éxito",
+            vence: pago.vencimiento 
+        });
 
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ msg: "Error en el servidor" });
+        console.error("Error en postLecturaDiaria:", error);
+        res.status(500).json({ msg: "Error interno del servidor al procesar la lectura" });
     }
-};
+};;
 
 export { getLectura, getLecturaId, postLecturaPrincipal, postLecturaDiaria };
