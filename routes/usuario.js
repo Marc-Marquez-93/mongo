@@ -25,7 +25,7 @@ router.put("/inactivar",
     // [a,
     // validarCampos],
      putUsuarioInactivar)
-router.delete("/", 
+router.delete("/:correo", 
     // [a,
     // validarCampos],
      deleteUsuario)

@@ -11,10 +11,10 @@ const getUsuario = async (req,res)=>{
 
 const postUsuario=async(req,res)=>{
     try {
-         const {nombre,fechanacimiento,email,estado}=req.body
+         const {nombre,fecha_nacimiento,email,estado}=req.body
 
         const usuario= new Usuario({
-            nombre,fechanacimiento,email,estado
+            nombre,fecha_nacimiento,email,estado
         })
 
         await usuario.save()
@@ -69,18 +69,25 @@ const putUsuarioInactivar=async(req,res)=>{
 
 }
 
-const deleteUsuario=async(req,res)=>{
+const deleteUsuario = async (req, res) => {
     try {
-        const {id}=req.params
+        const { correo } = req.params; 
 
-        await Usuario.findByIdAndDelete(id)
+        const usuarioEliminado = await Usuario.findOneAndDelete({ email: correo });
 
-        res.json({msg:"Usuario eliminado correctamente"})
+        if (!usuarioEliminado) {
+            return res.status(404).json({ 
+                msg: `No se encontró ningún usuario con el correo: ${correo}` 
+            });
+        }
+
+        res.json({ 
+            msg: "Usuario eliminado correctamente",
+            usuarioEliminado 
+        });
     } catch (error) {
-          res.status(400).json({error})
+        res.status(400).json({ error });
     }
-    
-
-}
+};
 
 export {getUsuario,postUsuario,putUsuario,putUsuarioActivar,putUsuarioInactivar,deleteUsuario}
