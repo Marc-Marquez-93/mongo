@@ -13,29 +13,29 @@ const router = Router();
 
 router.post(
   "/principal/:email",
-  // [a,
-  // validarCampos],
+  [check("email", "El email es obligatorio").isEmail().not().isEmpty(),
+  validarCampos],
   postLecturaPrincipal,
 );
 
 router.post(
   "/diaria/:email",
-  // [a,
-  // validarCampos],
+  [check("email", "El email es obligatorio").isEmail().not().isEmpty(),
+  validarCampos],
   postLecturaDiaria,
 );
 
 router.get(
   "/usuario/:email",
-  // [a,
-  // validarCampos],
+  [check("email", "El email es obligatorio").isEmail().not().isEmpty(),
+  validarCampos],
   getLectura,
 );
 
 router.get(
   "/:id",
-  // [a,
-  // validarCampos],
+  [check("id", "El id es obligatorio").not().isEmpty().isMongoId(),
+  validarCampos],
   getLecturaId,
 );
 

@@ -12,26 +12,27 @@ const router = Router();
 
 router.get(
   "/",
-  // [a,
+  // [check("email", "El email es obligatorio").isEmail().not().isEmpty(),
   // validarCampos],
   getPago,
 );
 router.get(
   "/:email",
-  // [a,
-  // validarCampos],
+  [check("email", "El email es obligatorio").isEmail().not().isEmpty(),
+  validarCampos],
   getByUsuario,
 );
 router.post(
   "/",
-  // [a,
-  // validarCampos],
+  [check("usuario_email", "El email del usuario es obligatorio").isEmail().not().isEmpty(),
+  check("metodo", "El método de pago es obligatorio").not().isEmpty().isIn([0, 1, 2]),
+  validarCampos],
   crearPago,
 );
 router.get(
   "/estado/:email",
-  // [a,
-  // validarCampos],
+  [check("email", "El email es obligatorio").isEmail().not().isEmpty(),
+  validarCampos],
   getEstado,
 );
 

@@ -2,8 +2,16 @@ import Usuario from "../models/usuario.js";
 
 const getUsuario = async (req, res) => {
   try {
-    const usuarios = await Usuario.find();
-    res.json({ usuarios });
+    const { email } = req.params;
+
+    const usuarioExistente = await Usuario.findOne({ email });
+
+    if (!usuarioExistente) {
+      return res
+        .status(404)
+        .json({ msg: "No existe un usuario con ese correo" });
+    }
+    res.json({ usuario: usuarioExistente });
   } catch (error) {
     res.status(400).json({ error });
   }
