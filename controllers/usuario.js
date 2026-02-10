@@ -11,10 +11,10 @@ const getUsuario = async (req,res)=>{
 
 const postUsuario=async(req,res)=>{
     try {
-         const {nombre,edad,fechanacimiento,email,estado}=req.body
+         const {nombre,fechanacimiento,email,estado}=req.body
 
         const usuario= new Usuario({
-            nombre,edad,fechanacimiento,email,estado
+            nombre,fechanacimiento,email,estado
         })
 
         await usuario.save()

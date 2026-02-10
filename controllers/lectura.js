@@ -56,7 +56,7 @@ const llamarGemini = async (prompt) => {
             respuesta = resGemini.data.candidates?.[0]?.content?.parts?.[0]?.text;
             if (respuesta) break; // Si obtenemos respuesta, salimos del bucle
         } catch (err) {
-            console.warn(`⚠️ API Key fallida, intentando con la siguiente...`);
+            console.warn(`⚠️ API Key fallida, intentando con la siguiente...`, err.message);
         }
     }
     return respuesta;
