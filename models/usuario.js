@@ -8,3 +8,8 @@ const usuario = new mongoose.Schema({
 });
 
 export default mongoose.model("Usuario",usuario)
+
+// PORT=4500
+// API_KEY=AIzaSyAstNgItf2I55oZapkfJjEo1SoFYXfLceU
+// API_KEY2=AIzaSyAstNgItf2I55oZapkfJjEo1SoFYXfLceU
+// API_KEY3=AIzaSyAstNgItf2I55oZapkfJjEo1SoFYXfLceU
