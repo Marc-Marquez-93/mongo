@@ -1,5 +1,51 @@
 import Usuario from "../models/usuario.js";
+import bcryptjs from "bcryptjs";
+import { generarJWT } from "../helpers/generar-jwt.js";
 
+// --- LOGIN (Genera el Token) ---
+const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // 1. Verificar si el email existe
+    const usuario = await Usuario.findOne({ email });
+    if (!usuario) {
+      return res.status(400).json({
+        msg: "Usuario / Password no son correctos - correo",
+      });
+    }
+
+    // 2. Verificar si el usuario está activo
+    if (usuario.estado === 0) {
+      return res.status(400).json({
+        msg: "Usuario / Password no son correctos - estado: false",
+      });
+    }
+
+    // 3. Verificar la contraseña (comparar la que llega con la encriptada en BD)
+    const validPassword = bcryptjs.compareSync(password, usuario.password);
+    if (!validPassword) {
+      return res.status(400).json({
+        msg: "Usuario / Password no son correctos - password",
+      });
+    }
+
+    // 4. Generar el JWT
+    const token = await generarJWT(usuario.id);
+
+    res.json({
+      usuario,
+      token,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Hable con el administrador",
+    });
+  }
+};
+
+// --- GET (Obtener usuario por email) ---
 const getUsuario = async (req, res) => {
   try {
     const { email } = req.params;
@@ -17,6 +63,7 @@ const getUsuario = async (req, res) => {
   }
 };
 
+// --- POST (Crear usuario con contraseña encriptada) ---
 const postUsuario = async (req, res) => {
   try {
     const { nombre, password, fecha_nacimiento, email, estado } = req.body;
@@ -29,6 +76,10 @@ const postUsuario = async (req, res) => {
       estado,
     });
 
+    // Encriptar la contraseña antes de guardar
+    const salt = bcryptjs.genSaltSync();
+    usuario.password = bcryptjs.hashSync(password, salt);
+
     await usuario.save();
 
     res.json({ usuario, msg: "Usuario creado correctamente" });
@@ -37,6 +88,7 @@ const postUsuario = async (req, res) => {
   }
 };
 
+// --- PUT (Actualizar usuario y re-encriptar contraseña si cambia) ---
 const putUsuario = async (req, res) => {
   try {
     const { nombre, password, fecha_nacimiento, email_nuevo } = req.body;
@@ -50,22 +102,33 @@ const putUsuario = async (req, res) => {
         .json({ msg: "No existe un usuario con ese correo" });
     }
 
-    const correoEnUso = await Usuario.findOne({ email: email_nuevo });
-    if (correoEnUso) {
-      return res
-        .status(400)
-        .json({ msg: "El nuevo correo ya está en uso por otro usuario" });
+    // Validar si el nuevo correo ya existe (si es que lo están cambiando)
+    if (email_nuevo && email_nuevo !== email) {
+      const correoEnUso = await Usuario.findOne({ email: email_nuevo });
+      if (correoEnUso) {
+        return res
+          .status(400)
+          .json({ msg: "El nuevo correo ya está en uso por otro usuario" });
+      }
+    }
+
+    // Manejo de la contraseña
+    let passwordFinal = usuarioExistente.password; // Por defecto dejamos la que ya tenía
+    if (password) {
+        // Si enviaron una nueva contraseña, la encriptamos
+        const salt = bcryptjs.genSaltSync();
+        passwordFinal = bcryptjs.hashSync(password, salt);
     }
 
     const usuarioActualizado = await Usuario.findByIdAndUpdate(
       usuarioExistente._id,
       {
         nombre,
-        password,
+        password: passwordFinal, // Usamos la variable controlada
         fecha_nacimiento,
         email: email_nuevo || email,
       },
-      { new: true },
+      { new: true }
     );
 
     res.json({
@@ -81,6 +144,7 @@ const putUsuario = async (req, res) => {
   }
 };
 
+// --- PUT (Activar) ---
 const putUsuarioActivar = async (req, res) => {
   try {
     const { email } = req.params;
@@ -101,6 +165,7 @@ const putUsuarioActivar = async (req, res) => {
   }
 };
 
+// --- PUT (Inactivar) ---
 const putUsuarioInactivar = async (req, res) => {
   try {
     const { email } = req.params;
@@ -121,6 +186,7 @@ const putUsuarioInactivar = async (req, res) => {
   }
 };
 
+// --- DELETE ---
 const deleteUsuario = async (req, res) => {
   try {
     const { email } = req.params;
@@ -143,6 +209,7 @@ const deleteUsuario = async (req, res) => {
 };
 
 export {
+  login, 
   getUsuario,
   postUsuario,
   putUsuario,
