@@ -11,7 +11,7 @@ import {
 } from "../controllers/usuario.js";
 import { validarCampos } from "../middlewares/validar-campos.js";
 import { validarJWT } from "../middlewares/validar-jwt.js"; // Importamos el middleware de seguridad
-import { esFechaValida } from "../helpers/validar-fecha.js";
+import { esFechaValida } from "../helpers/usuario.js";
 
 const router = new Router();
 
