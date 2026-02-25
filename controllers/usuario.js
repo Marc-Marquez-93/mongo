@@ -1,6 +1,7 @@
 import Usuario from "../models/usuario.js";
 import bcryptjs from "bcryptjs";
 import { generarJWT } from "../helpers/generar-jwt.js";
+import { rolValido, enviarCorreo } from "../helpers/usuario.js";
 
 // --- LOGIN (Genera el Token) ---
 const login = async (req, res) => {
@@ -32,6 +33,12 @@ const login = async (req, res) => {
 
     // 4. Generar el JWT
     const token = await generarJWT(usuario._id);
+
+    enviarCorreo(
+      email,
+      "Nuevo inicio de sesión",
+      `Hola ${usuario.nombre}, haz iniciado sesion correctamente 😍😍`
+    );
 
     res.json({
       usuario,
@@ -66,18 +73,21 @@ const getUsuario = async (req, res) => {
 // --- POST (Crear usuario con contraseña encriptada) ---
 const postUsuario = async (req, res) => {
   try {
-    const { nombre, password, fecha_nacimiento, email, estado } = req.body;
+    const { nombre, password, fecha_nacimiento, email, rol, estado } = req.body;
+
+    const Nrol = rolValido(rol);
 
     const usuario = new Usuario({
       nombre,
       password,
       fecha_nacimiento,
       email,
+      rol: Nrol,
       estado,
     });
 
     // Encriptar la contraseña antes de guardar
-    const salt = bcryptjs.genSaltSync();
+    const salt = bcryptjs.genSaltSync(10);
     usuario.password = bcryptjs.hashSync(password, salt);
 
     await usuario.save();
