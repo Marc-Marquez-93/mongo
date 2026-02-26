@@ -236,8 +236,11 @@ const postUsuario = async (req, res) => {
         break;
     }
 
+    const usuarioResponse = usuario.toObject();
+    delete usuarioResponse.password;
+
     res.json({
-      usuario,
+      usuario: usuarioResponse,
       msg: `Usuario ${Nrol} creado correctamente`
     });
 
