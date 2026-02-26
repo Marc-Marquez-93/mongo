@@ -33,11 +33,13 @@ router.post(
   "/cambiarPassword",
   [
     check("email", "El correo es obligatorio").isEmail(),
+    check("passwordActual", "La contraseña actual es obligatoria").not().isEmpty(),
     check("password", "La nueva contraseña debe tener entre 7 y 10 caracteres").isLength({ min: 7, max: 10 }),
+    check("confirmarPassword", "Debes confirmar la nueva contraseña").not().isEmpty(),
     check("password").custom(validarPasswordConfirmacion),
     validarCampos,
   ],
-  cambiarPassword // Esta es la función que haremos en el controlador
+  cambiarPassword 
 );
 
 // Paso 1: Pedir el código

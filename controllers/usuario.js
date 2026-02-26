@@ -53,7 +53,7 @@ const login = async (req, res) => {
 };
 
 export const cambiarPassword = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, passwordActual, password } = req.body;
 
     try {
         const usuario = await Usuario.findOne({ email });
@@ -64,17 +64,28 @@ export const cambiarPassword = async (req, res) => {
             });
         }
 
-        // Encriptar la nueva contraseña definitiva
-        const salt = bcryptjs.genSaltSync();
+        const validPassword = bcryptjs.compareSync(passwordActual, usuario.password);
+        if (!validPassword) {
+            return res.status(400).json({
+                msg: "La contraseña actual es incorrecta",
+            });
+        }
+
+        if (passwordActual === password) {
+            return res.status(400).json({
+                msg: "La nueva contraseña no puede ser igual a la anterior",
+            });
+        }
+
+        const salt = bcryptjs.genSaltSync(10);
         usuario.password = bcryptjs.hashSync(password, salt);
 
         await usuario.save();
 
-        // Avisar por correo del cambio exitoso
         enviarCorreo(
             email,
             "Seguridad: Tu contraseña ha sido cambiada",
-            `Hola ${usuario.nombre}, te informamos que tu contraseña ha sido actualizada correctamente. Si no fuiste tú, contacta a soporte.`
+            `Hola ${usuario.nombre}, te informamos que tu contraseña ha sido actualizada correctamente. Si no fuiste tú, contacta a soporte inmediatamente.`
         );
 
         res.json({
@@ -82,9 +93,9 @@ export const cambiarPassword = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).json({
-            msg: "Error al actualizar la contraseña",
+            msg: "Error al actualizar la contraseña, hable con el administrador",
         });
     }
 };
