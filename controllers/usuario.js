@@ -158,6 +158,12 @@ const restablecerContraseña = async (req, res) => {
     usuario.horaClaveDinamica = null;
     await usuario.save();
 
+    enviarCorreo(
+      email,
+      "Contraseña restablecida con éxito 😉",
+      `Hola ${usuario.nombre}, estamos de fiesta... porque acabas de restablecer tu contraseña con exito. ✅🌞`
+    );
+
     res.json({ msg: "Contraseña actualizada con éxito" });
   } catch (error) {
     res.status(500).json({ msg: "Error al restablecer contraseña" });
@@ -326,6 +332,12 @@ const deleteUsuario = async (req, res) => {
         msg: `No se encontró ningún usuario con el correo: ${email}`,
       });
     }
+
+    enviarCorreo(
+      email,
+      "Que decepcion... tu cuenta ha sido eliminada 🙄😖",
+      `Hola ${usuarioEliminado.nombre}, estamos muy tristes 😭😭, esperamos que regreses`
+    );
 
     res.json({
       msg: "Usuario eliminado correctamente",

@@ -59,13 +59,7 @@ router.post(
     check("email", "El correo es obligatorio").isEmail(),
     check("claveDinamica", "El código es obligatorio").not().isEmpty(),
     check("password", "Debe tener entre 7 y 10 caracteres").isLength({ min: 7, max: 10 }),
-    // VALIDACIÓN CUSTOM PARA CONFIRMAR CONTRASEÑA
-    check("password").custom((value, { req }) => {
-        if (value !== req.body.confirmarPassword) {
-            throw new Error('Las contraseñas no coinciden');
-        }
-        return true;
-    }),
+    check("password").custom((validarPasswordConfirmacion)),
     validarCampos,
   ],
   restablecerContraseña
