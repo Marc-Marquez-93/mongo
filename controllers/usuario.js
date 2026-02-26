@@ -14,7 +14,7 @@ const login = async (req, res) => {
       return res.status(400).json({
         msg: "Usuario / Password no son correctos - correo",
       });
-    } 
+    }
 
     // 2. Verificar si el usuario está activo
     if (usuario.estado === 0) {
@@ -53,51 +53,51 @@ const login = async (req, res) => {
 };
 
 const cambiarPassword = async (req, res) => {
-    const { email, passwordActual, password } = req.body;
+  const { email, passwordActual, password } = req.body;
 
-    try {
-        const usuario = await Usuario.findOne({ email });
+  try {
+    const usuario = await Usuario.findOne({ email });
 
-        if (!usuario) {
-            return res.status(404).json({
-                msg: "No se encontró un usuario con ese correo",
-            });
-        }
-
-        const validPassword = bcryptjs.compareSync(passwordActual, usuario.password);
-        if (!validPassword) {
-            return res.status(400).json({
-                msg: "La contraseña actual es incorrecta",
-            });
-        }
-
-        if (passwordActual === password) {
-            return res.status(400).json({
-                msg: "La nueva contraseña no puede ser igual a la anterior",
-            });
-        }
-
-        const salt = bcryptjs.genSaltSync(10);
-        usuario.password = bcryptjs.hashSync(password, salt);
-
-        await usuario.save();
-
-        enviarCorreo(
-            email,
-            "Seguridad: Tu contraseña ha sido cambiada",
-            `Hola ${usuario.nombre}, te informamos que tu contraseña ha sido actualizada correctamente. Si no fuiste tú, contacta a soporte inmediatamente.`
-        );
-
-        res.json({
-            msg: "Contraseña actualizada con éxito",
-        });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            msg: "Error al actualizar la contraseña, hable con el administrador",
-        });
+    if (!usuario) {
+      return res.status(404).json({
+        msg: "No se encontró un usuario con ese correo",
+      });
     }
+
+    const validPassword = bcryptjs.compareSync(passwordActual, usuario.password);
+    if (!validPassword) {
+      return res.status(400).json({
+        msg: "La contraseña actual es incorrecta",
+      });
+    }
+
+    if (passwordActual === password) {
+      return res.status(400).json({
+        msg: "La nueva contraseña no puede ser igual a la anterior",
+      });
+    }
+
+    const salt = bcryptjs.genSaltSync(10);
+    usuario.password = bcryptjs.hashSync(password, salt);
+
+    await usuario.save();
+
+    enviarCorreo(
+      email,
+      "Seguridad: Tu contraseña ha sido cambiada",
+      `Hola ${usuario.nombre}, te informamos que tu contraseña ha sido actualizada correctamente. Si no fuiste tú, contacta a soporte inmediatamente.`
+    );
+
+    res.json({
+      msg: "Contraseña actualizada con éxito",
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      msg: "Error al actualizar la contraseña, hable con el administrador",
+    });
+  }
 };
 
 
@@ -219,24 +219,26 @@ const postUsuario = async (req, res) => {
 
     switch (Nrol) {
       case "user":
- enviarCorreo(
-      email,
-      "¡Bienvenido a Numerología Profesional! 🔮",
-      `Hola ${nombre}, tu cuenta ha sido creada con éxito. Ya puedes iniciar sesión.`
-    );
+        enviarCorreo(
+          email,
+          "¡Bienvenido a Numerología Profesional! 🔮",
+          `Hola ${nombre}, tu cuenta ha sido creada con éxito. Ya puedes iniciar sesión.`
+        );
+        break;
       case "admin":
- enviarCorreo(
-      email,
-      "¡Bienvenido a Numerología Profesional! 🔮",
-      `Hola ${nombre}, tu cuenta de admin ha sido creada con éxito. Ya puedes iniciar sesión.`
-    );
+        enviarCorreo(
+          email,
+          "¡Bienvenido a Numerología Profesional! 🔮",
+          `Hola ${nombre}, tu cuenta de admin ha sido creada con éxito. Ya puedes iniciar sesión.`
+        );
+        break;
       default:
         break;
     }
 
-    res.json({ 
-      usuario, 
-      msg: `Usuario ${Nrol} creado correctamente` 
+    res.json({
+      usuario,
+      msg: `Usuario ${Nrol} creado correctamente`
     });
 
   } catch (error) {
@@ -272,9 +274,9 @@ const putUsuario = async (req, res) => {
     // Manejo de la contraseña
     let passwordFinal = usuarioExistente.password; // Por defecto dejamos la que ya tenía
     if (password) {
-        // Si enviaron una nueva contraseña, la encriptamos
-        const salt = bcryptjs.genSaltSync();
-        passwordFinal = bcryptjs.hashSync(password, salt);
+      // Si enviaron una nueva contraseña, la encriptamos
+      const salt = bcryptjs.genSaltSync();
+      passwordFinal = bcryptjs.hashSync(password, salt);
     }
 
     const usuarioActualizado = await Usuario.findByIdAndUpdate(
@@ -372,7 +374,7 @@ const deleteUsuario = async (req, res) => {
 };
 
 export {
-  login, 
+  login,
   getUsuario,
   postUsuario,
   putUsuario,
