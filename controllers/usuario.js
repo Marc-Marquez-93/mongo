@@ -36,8 +36,8 @@ const login = async (req, res) => {
 
     enviarCorreo(
       email,
-      "Nuevo inicio de sesión",
-      `Hola ${usuario.nombre}, haz iniciado sesion correctamente 😍😍`
+      "Nuevo inicio de sesión en tu app Numerologica",
+      `Hola ${usuario.nombre}, haz iniciado sesion correctamente en nuestra app, es un gusto tenerte con nosotros 😍😍.`
     );
 
     res.json({
