@@ -52,6 +52,106 @@ const login = async (req, res) => {
   }
 };
 
+export const cambiarPassword = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const usuario = await Usuario.findOne({ email });
+
+        if (!usuario) {
+            return res.status(404).json({
+                msg: "No se encontró un usuario con ese correo",
+            });
+        }
+
+        // Encriptar la nueva contraseña definitiva
+        const salt = bcryptjs.genSaltSync();
+        usuario.password = bcryptjs.hashSync(password, salt);
+
+        await usuario.save();
+
+        // Avisar por correo del cambio exitoso
+        enviarCorreo(
+            email,
+            "Seguridad: Tu contraseña ha sido cambiada",
+            `Hola ${usuario.nombre}, te informamos que tu contraseña ha sido actualizada correctamente. Si no fuiste tú, contacta a soporte.`
+        );
+
+        res.json({
+            msg: "Contraseña actualizada con éxito",
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            msg: "Error al actualizar la contraseña",
+        });
+    }
+};
+
+// bloque de restablecer contraseña
+
+// 1. Solicitar recuperación (Genera el código de 6 dígitos)
+const solicitarRecuperacion = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const usuario = await Usuario.findOne({ email });
+    if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado" });
+
+    // Generar código de 6 dígitos aleatorio
+    const codigo = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Guardar en la BD con la hora actual
+    usuario.claveDinamica = codigo;
+    usuario.horaClaveDinamica = new Date();
+    await usuario.save();
+
+    // Enviar el correo con el código
+    enviarCorreo(
+      email,
+      "Tu código de recuperación 🔑",
+      `Hola ${usuario.nombre}, tu código para restablecer la contraseña es: ${codigo}. Tienes 30 minutos antes de que expire.`
+    );
+
+    res.json({ msg: "Código enviado al correo" });
+  } catch (error) {
+    res.status(500).json({ msg: "Error al solicitar recuperación" });
+  }
+};
+
+// 2. Restablecer contraseña (Verifica código y tiempo)
+const restablecerContraseña = async (req, res) => {
+  const { email, claveDinamica, password } = req.body;
+  try {
+    const usuario = await Usuario.findOne({ email });
+    if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado" });
+
+    // 1. Verificar si el código coincide
+    if (usuario.claveDinamica !== claveDinamica) {
+      return res.status(400).json({ msg: "El código es incorrecto" });
+    }
+
+    // 2. Verificar si han pasado más de 30 minutos
+    const ahora = new Date();
+    const diferenciaMinutos = (ahora - usuario.horaClaveDinamica) / (1000 * 60);
+
+    if (diferenciaMinutos > 30) {
+      return res.status(400).json({ msg: "El código ha expirado (más de 30 min)" });
+    }
+
+    // 3. Todo bien -> Encriptar nueva contraseña y limpiar campos
+    const salt = bcryptjs.genSaltSync(10);
+    usuario.password = bcryptjs.hashSync(password, salt);
+    usuario.claveDinamica = null;
+    usuario.horaClaveDinamica = null;
+    await usuario.save();
+
+    res.json({ msg: "Contraseña actualizada con éxito" });
+  } catch (error) {
+    res.status(500).json({ msg: "Error al restablecer contraseña" });
+  }
+};
+
 // --- GET (Obtener usuario por email) ---
 const getUsuario = async (req, res) => {
   try {
@@ -91,6 +191,12 @@ const postUsuario = async (req, res) => {
     usuario.password = bcryptjs.hashSync(password, salt);
 
     await usuario.save();
+
+    enviarCorreo(
+    email,
+    "¡Bienvenido a Numerología Profesional! 🔮",
+    `Hola ${nombre}, tu cuenta ha sido creada con éxito. Ya puedes iniciar sesión y descubrir lo que los números dicen de ti.`
+);
 
     res.json({ usuario, msg: "Usuario creado correctamente" });
   } catch (error) {
@@ -226,4 +332,7 @@ export {
   putUsuarioActivar,
   putUsuarioInactivar,
   deleteUsuario,
+  cambiarPassword,
+  restablecerContraseña,
+  solicitarRecuperacion
 };

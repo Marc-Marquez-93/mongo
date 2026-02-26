@@ -7,11 +7,14 @@ import {
   putUsuario,
   putUsuarioActivar,
   putUsuarioInactivar,
-  login, // Importamos login
+  login, 
+  cambiarPassword,
+  restablecerContraseña,
+  solicitarRecuperacion
 } from "../controllers/usuario.js";
 import { validarCampos } from "../middlewares/validar-campos.js";
 import { validarJWT } from "../middlewares/validar-jwt.js"; // Importamos el middleware de seguridad
-import { esFechaValida } from "../helpers/usuario.js";
+import { esFechaValida, validarPasswordConfirmacion } from "../helpers/usuario.js";
 
 const router = new Router();
 
@@ -24,6 +27,46 @@ router.post(
     validarCampos,
   ],
   login
+);
+
+router.post(
+  "/cambiarPassword",
+  [
+    check("email", "El correo es obligatorio").isEmail(),
+    check("password", "La nueva contraseña debe tener entre 7 y 10 caracteres").isLength({ min: 7, max: 10 }),
+    check("password").custom(validarPasswordConfirmacion),
+    validarCampos,
+  ],
+  cambiarPassword // Esta es la función que haremos en el controlador
+);
+
+// Paso 1: Pedir el código
+router.post(
+  "/solicitarRecuperacion",
+  [
+    check("email", "El correo es obligatorio").isEmail(),
+    validarCampos,
+  ],
+  solicitarRecuperacion
+);
+
+// Paso 2: Poner el código y la nueva contraseña
+router.post(
+  "/restablecerPassword",
+  [
+    check("email", "El correo es obligatorio").isEmail(),
+    check("claveDinamica", "El código es obligatorio").not().isEmpty(),
+    check("password", "Debe tener entre 7 y 10 caracteres").isLength({ min: 7, max: 10 }),
+    // VALIDACIÓN CUSTOM PARA CONFIRMAR CONTRASEÑA
+    check("password").custom((value, { req }) => {
+        if (value !== req.body.confirmarPassword) {
+            throw new Error('Las contraseñas no coinciden');
+        }
+        return true;
+    }),
+    validarCampos,
+  ],
+  restablecerContraseña
 );
 
 // --- RUTAS PÚBLICAS ---

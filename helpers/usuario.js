@@ -72,3 +72,9 @@ export const enviarCorreo = async function enviarCorreo(to, subject, body) {
     }
 }
 
+export const validarPasswordConfirmacion = (password, { req }) => {
+    if (password !== req.body.confirmarPassword) {
+        throw new Error('Las contraseñas no coinciden, verifica nuevamente');
+    }
+    return true;
+};
