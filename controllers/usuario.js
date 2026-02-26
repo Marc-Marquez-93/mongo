@@ -191,9 +191,17 @@ const getUsuario = async (req, res) => {
 // --- POST (Crear usuario con contraseña encriptada) ---
 const postUsuario = async (req, res) => {
   try {
-    const { nombre, password, fecha_nacimiento, email, rol, estado } = req.body;
+    const { nombre, password, fecha_nacimiento, email, rol, estado, adminCode } = req.body;
 
     const Nrol = rolValido(rol);
+
+    if (Nrol === "admin") {
+      if (adminCode !== process.env.ADMIN_SECRET_KEY) {
+        return res.status(401).json({
+          msg: "No tienes autorización para crear una cuenta de administrador. Código incorrecto.",
+        });
+      }
+    }
 
     const usuario = new Usuario({
       nombre,
@@ -204,20 +212,35 @@ const postUsuario = async (req, res) => {
       estado,
     });
 
-    // Encriptar la contraseña antes de guardar
     const salt = bcryptjs.genSaltSync(10);
     usuario.password = bcryptjs.hashSync(password, salt);
 
     await usuario.save();
 
-    enviarCorreo(
-    email,
-    "¡Bienvenido a Numerología Profesional! 🔮",
-    `Hola ${nombre}, tu cuenta ha sido creada con éxito. Ya puedes iniciar sesión y descubrir lo que los números dicen de ti.`
-);
+    switch (Nrol) {
+      case "user":
+ enviarCorreo(
+      email,
+      "¡Bienvenido a Numerología Profesional! 🔮",
+      `Hola ${nombre}, tu cuenta ha sido creada con éxito. Ya puedes iniciar sesión.`
+    );
+      case "admin":
+ enviarCorreo(
+      email,
+      "¡Bienvenido a Numerología Profesional! 🔮",
+      `Hola ${nombre}, tu cuenta de admin ha sido creada con éxito. Ya puedes iniciar sesión.`
+    );
+      default:
+        break;
+    }
 
-    res.json({ usuario, msg: "Usuario creado correctamente" });
+    res.json({ 
+      usuario, 
+      msg: `Usuario ${Nrol} creado correctamente` 
+    });
+
   } catch (error) {
+    console.log(error);
     res.status(400).json({ error });
   }
 };
