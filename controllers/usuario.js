@@ -52,7 +52,7 @@ const login = async (req, res) => {
   }
 };
 
-export const cambiarPassword = async (req, res) => {
+const cambiarPassword = async (req, res) => {
     const { email, passwordActual, password } = req.body;
 
     try {
@@ -99,6 +99,7 @@ export const cambiarPassword = async (req, res) => {
         });
     }
 };
+
 
 // bloque de restablecer contraseña
 
@@ -343,7 +344,7 @@ export {
   putUsuarioActivar,
   putUsuarioInactivar,
   deleteUsuario,
-  cambiarPassword,
   restablecerContraseña,
-  solicitarRecuperacion
+  solicitarRecuperacion,
+  cambiarPassword
 };
