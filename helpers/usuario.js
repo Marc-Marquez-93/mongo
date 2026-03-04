@@ -7,7 +7,7 @@ export const esFechaValida = (value) => {
     if (fechaEntrada > ahora) {
         throw new Error("La fecha no puede ser mayor a la actual");
     }
-    
+
     return true;
 };
 
@@ -27,10 +27,13 @@ export const enviarCorreo = async function enviarCorreo(to, subject, body) {
         let transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
             port: 465,
-            secure: true, 
+            secure: true,
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
+            },
+            tls: {
+                rejectUnauthorized: false
             }
         });
 
