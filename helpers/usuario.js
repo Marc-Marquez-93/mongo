@@ -25,13 +25,10 @@ export const rolValido = (value) => {
 export const enviarCorreo = async function enviarCorreo(to, subject, body) {
     try {
         let transporter = nodemailer.createTransport({
-            service: 'gmail', // Nodemailer ya sabe que el host es smtp.gmail.com y el puerto es 465 o 587
+            service: 'gmail', 
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
-            },
-            tls: {
-                rejectUnauthorized: false // Sigue siendo recomendable en la nube
             }
         });
 
