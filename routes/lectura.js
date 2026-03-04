@@ -13,8 +13,7 @@ const router = Router();
 
 router.post(
   "/principal/:email",
-  [validarJWT,
-    check("email", "El email es obligatorio").isEmail().not().isEmpty(),
+  [check("email", "El email es obligatorio").isEmail().not().isEmpty(),
   validarCampos],
   postLecturaPrincipal,
 );
