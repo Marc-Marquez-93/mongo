@@ -26,8 +26,8 @@ export const enviarCorreo = async function enviarCorreo(to, subject, body) {
     try {
         let transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
-            port: 465,
-            secure: true,
+            port: 587,
+            secure: false, // false para puerto 587
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
