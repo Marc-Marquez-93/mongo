@@ -3,6 +3,7 @@ import { GoogleGenAI } from "@google/genai"; // La librería nueva que me indica
 import Lectura from "../models/lecturas.js";
 import Pago from "../models/pagos.js";
 import Usuario from "../models/usuario.js";
+import { enviarCorreo } from "../helpers/usuario.js";
 
 const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -206,6 +207,12 @@ const postLecturaDiaria = async (req, res = response) => {
     });
 
     await nuevaLectura.save();
+
+        enviarCorreo(
+          email,
+          "Tu energía diaria de hoy",
+          `Saludito energicoooo, adivina? se ha generado tu lectura diaria. ve y buscala en la web`
+        );
 
     res.json({
       nuevaLectura,
