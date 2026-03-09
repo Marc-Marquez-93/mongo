@@ -188,6 +188,15 @@ const getUsuario = async (req, res) => {
   }
 };
 
+const getAll = async (req, res) => {
+  try {
+    const usuarios = await Usuario.find();
+    res.json({ usuarios });
+  } catch (error) {
+    res.status(400).json({ error });
+  }
+}
+
 // --- POST (Crear usuario con contraseña encriptada) ---
 const postUsuario = async (req, res) => {
   try {
@@ -386,5 +395,6 @@ export {
   deleteUsuario,
   restablecerContraseña,
   solicitarRecuperacion,
-  cambiarPassword
+  cambiarPassword,
+  getAll
 };

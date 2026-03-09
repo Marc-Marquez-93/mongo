@@ -10,7 +10,8 @@ import {
   login, 
   cambiarPassword,
   restablecerContraseña,
-  solicitarRecuperacion
+  solicitarRecuperacion,
+  getAll
 } from "../controllers/usuario.js";
 import { validarCampos } from "../middlewares/validar-campos.js";
 import { validarJWT } from "../middlewares/validar-jwt.js"; // Importamos el middleware de seguridad
@@ -91,6 +92,15 @@ router.get(
   getUsuario
 );
 
+router.get(
+  "/",
+  [
+    validarJWT, // PROTEGIDA
+    check("email", "El email es obligatorio").isEmail(),
+    validarCampos
+  ],
+  getAll
+);
 router.put(
   "/:email",
   [
