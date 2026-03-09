@@ -96,7 +96,6 @@ router.get(
   "/",
   [
     validarJWT, // PROTEGIDA
-    check("email", "El email es obligatorio").isEmail(),
     validarCampos
   ],
   getAll
